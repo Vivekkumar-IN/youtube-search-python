@@ -2,20 +2,24 @@ import copy
 from typing import Union
 
 from youtubesearchpython.core import VideoCore
+from youtubesearchpython.core.channel import ChannelCore
 from youtubesearchpython.core.comments import CommentsCore
+from youtubesearchpython.core.constants import *
 from youtubesearchpython.core.hashtag import HashtagCore
 from youtubesearchpython.core.playlist import PlaylistCore
 from youtubesearchpython.core.suggestions import SuggestionsCore
 from youtubesearchpython.core.transcript import TranscriptCore
-from youtubesearchpython.core.channel import ChannelCore
-from youtubesearchpython.core.constants import *
 
 
 class Video:
     @staticmethod
-    def get(videoLink: str, mode: int = ResultMode.dict, timeout: int = None, get_upload_date: bool = False) -> Union[
-        dict, str, None]:
-        '''Fetches information and formats  for the given video link or ID.
+    def get(
+        videoLink: str,
+        mode: int = ResultMode.dict,
+        timeout: int = None,
+        get_upload_date: bool = False,
+    ) -> Union[dict, str, None]:
+        """Fetches information and formats  for the given video link or ID.
         Returns None if video is unavailable.
 
         Args:
@@ -259,7 +263,7 @@ class Video:
                         }
                     ]
                 }
-        '''
+        """
         vc = VideoCore(videoLink, None, mode, timeout, get_upload_date)
         if get_upload_date:
             vc.sync_html_create()
@@ -267,8 +271,10 @@ class Video:
         return vc.result
 
     @staticmethod
-    def getInfo(videoLink: str, mode: int = ResultMode.dict, timeout: int = None) -> Union[dict, str, None]:
-        '''Fetches only information for the given video link or ID.
+    def getInfo(
+        videoLink: str, mode: int = ResultMode.dict, timeout: int = None
+    ) -> Union[dict, str, None]:
+        """Fetches only information for the given video link or ID.
         Returns None if video is unavailable.
 
         Args:
@@ -347,15 +353,17 @@ class Video:
                 "uploadDate": "2020-05-18",
                 "link": "https://www.youtube.com/watch?v=E07s5ZYygMg",
             }
-        '''
+        """
         vc = VideoCore(videoLink, "getInfo", mode, timeout, True)
         vc.sync_html_create()
         vc.post_request_only_html_processing()
         return vc.result
 
     @staticmethod
-    def getFormats(videoLink: str, mode: int = ResultMode.dict, timeout: int = None) -> Union[dict, str, None]:
-        '''Fetches formats  for the given video link or ID.
+    def getFormats(
+        videoLink: str, mode: int = ResultMode.dict, timeout: int = None
+    ) -> Union[dict, str, None]:
+        """Fetches formats  for the given video link or ID.
         Returns None if video is unavailable.
 
         Args:
@@ -534,14 +542,14 @@ class Video:
                     ]
                 }
             }
-        '''
+        """
         vc = VideoCore(videoLink, "getFormats", mode, timeout, False)
         vc.sync_create()
         return vc.result
 
 
 class Playlist:
-    '''Fetches information and videos for the given playlist link.
+    """Fetches information and videos for the given playlist link.
     Returns None if playlist is unavailable.
 
     The information of the playlist can be accessed in the `info` field of the class.
@@ -555,7 +563,8 @@ class Playlist:
 
     Args:
         playlistLink (str): link of the playlist on YouTube.
-    '''
+    """
+
     __playlist = None
     videos = []
     info = None
@@ -563,25 +572,29 @@ class Playlist:
 
     def __init__(self, playlistLink: str, timeout: int = None):
         self.timeout = timeout
-        self.__playlist = PlaylistCore(playlistLink, None, ResultMode.dict, self.timeout)
+        self.__playlist = PlaylistCore(
+            playlistLink, None, ResultMode.dict, self.timeout
+        )
         self.__playlist.sync_create()
         self.info = copy.deepcopy(self.__playlist.result)
-        self.videos = self.__playlist.result['videos']
+        self.videos = self.__playlist.result["videos"]
         self.hasMoreVideos = self.__playlist.continuationKey != None
-        self.info.pop('videos')
+        self.info.pop("videos")
 
-    '''Fetches more susequent videos of the playlist, and appends to the `videos` list.
+    """Fetches more susequent videos of the playlist, and appends to the `videos` list.
     `hasMoreVideos` bool indicates whether more videos can be fetched or not.
-    '''
+    """
 
     def getNextVideos(self) -> None:
         self.__playlist._next()
-        self.videos = self.__playlist.result['videos']
+        self.videos = self.__playlist.result["videos"]
         self.hasMoreVideos = self.__playlist.continuationKey != None
 
     @staticmethod
-    def get(playlistLink: str, mode: int = ResultMode.dict, timeout: int = None) -> Union[dict, str, None]:
-        '''Fetches information and videos for the given playlist link.
+    def get(
+        playlistLink: str, mode: int = ResultMode.dict, timeout: int = None
+    ) -> Union[dict, str, None]:
+        """Fetches information and videos for the given playlist link.
         Returns None if playlist is unavailable.
 
         Args:
@@ -1128,14 +1141,16 @@ class Playlist:
                     }
                 ]
             }
-        '''
+        """
         pc = PlaylistCore(playlistLink, None, mode, timeout)
         pc.sync_create()
         return pc.result
 
     @staticmethod
-    def getInfo(playlistLink: str, mode: int = ResultMode.dict, timeout: int = None) -> Union[dict, str, None]:
-        '''Fetches only information for the given playlist link.
+    def getInfo(
+        playlistLink: str, mode: int = ResultMode.dict, timeout: int = None
+    ) -> Union[dict, str, None]:
+        """Fetches only information for the given playlist link.
         Returns None if playlist is unavailable.
 
         Args:
@@ -1199,14 +1214,16 @@ class Playlist:
                     "link": "https://www.youtube.com/channel/UC_aEa8K-EOJ3D6gOs7HcyNg"
                 }
             }
-        '''
-        ps = PlaylistCore(playlistLink, 'getInfo', mode, timeout)
+        """
+        ps = PlaylistCore(playlistLink, "getInfo", mode, timeout)
         ps.sync_create()
         return ps.result
 
     @staticmethod
-    def getVideos(playlistLink: str, mode: int = ResultMode.dict, timeout: int = None) -> Union[dict, str, None]:
-        '''Fetches only videos in the given playlist from link.
+    def getVideos(
+        playlistLink: str, mode: int = ResultMode.dict, timeout: int = None
+    ) -> Union[dict, str, None]:
+        """Fetches only videos in the given playlist from link.
         Returns None if playlist is unavailable.
 
         Args:
@@ -1702,21 +1719,21 @@ class Playlist:
                     }
                 ]
             }
-        '''
-        ps = PlaylistCore(playlistLink, 'getVideos', mode, timeout)
+        """
+        ps = PlaylistCore(playlistLink, "getVideos", mode, timeout)
         ps.sync_create()
         return ps.result
 
 
 class Hashtag(HashtagCore):
-    '''Fetches videos for the given hashtag.
+    """Fetches videos for the given hashtag.
 
     Args:
         query (str): Sets the search query.
         limit (int, optional): Sets limit to the number of results. Defaults to 20.
         language (str, optional): Sets the result language. Defaults to 'en'.
         region (str, optional): Sets the result region. Defaults to 'US'.
-    
+
     Examples:
         Calling `result` method gives the search result.
 
@@ -1783,9 +1800,16 @@ class Hashtag(HashtagCore):
                 }
             ]
         }
-    '''
+    """
 
-    def __init__(self, hashtag: str, limit: int = 60, language: str = 'en', region: str = 'US', timeout: int = None):
+    def __init__(
+        self,
+        hashtag: str,
+        limit: int = 60,
+        language: str = "en",
+        region: str = "US",
+        timeout: int = None,
+    ):
         super().__init__(hashtag, limit, language, region, timeout)
         self.sync_create()
 
@@ -1830,7 +1854,9 @@ class Transcript:
 
 
 class Channel(ChannelCore):
-    def __init__(self, channel_id: str, request_type: str = ChannelRequestType.playlists):
+    def __init__(
+        self, channel_id: str, request_type: str = ChannelRequestType.playlists
+    ):
         super().__init__(channel_id, request_type)
         self.sync_create()
 

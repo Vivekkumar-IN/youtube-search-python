@@ -1,14 +1,16 @@
-from typing import List, Union
 import json
+from typing import List, Union
+
+from youtubesearchpython.core.constants import *
 from youtubesearchpython.handlers.componenthandler import ComponentHandler
 from youtubesearchpython.handlers.requesthandler import RequestHandler
-from youtubesearchpython.core.constants import *
 
 
 def overrides(interface_class):
     def overrider(method):
-        assert(method.__name__ in dir(interface_class))
+        assert method.__name__ in dir(interface_class)
         return method
+
     return overrider
 
 
@@ -18,47 +20,65 @@ class LegacyComponentHandler(RequestHandler, ComponentHandler):
     @overrides(ComponentHandler)
     def _getVideoComponent(self, element: dict, shelfTitle: str = None) -> dict:
         video = element[videoElementKey]
-        videoId = self.__getValue(video, ['videoId'])
+        videoId = self.__getValue(video, ["videoId"])
         viewCount = 0
         thumbnails = []
-        for character in self.__getValue(video, ['viewCountText', 'simpleText']):
+        for character in self.__getValue(video, ["viewCountText", "simpleText"]):
             if character.isnumeric():
                 viewCount = viewCount * 10 + int(character)
-        modes = ['default', 'hqdefault', 'mqdefault', 'sddefault', 'maxresdefault']
+        modes = ["default", "hqdefault", "mqdefault", "sddefault", "maxresdefault"]
         for mode in modes:
-            thumbnails.append('https://img.youtube.com/vi/' + videoId + '/' + mode + '.jpg')
+            thumbnails.append(
+                "https://img.youtube.com/vi/" + videoId + "/" + mode + ".jpg"
+            )
         component = {
-            'index':                          self.index,
-            'id':                             videoId,
-            'link':                           'https://www.youtube.com/watch?v=' + videoId,
-            'title':                          self.__getValue(video, ['title', 'runs', 0, 'text']),
-            'channel':                        self.__getValue(video, ['ownerText', 'runs', 0, 'text']),
-            'duration':                       self.__getValue(video, ['lengthText', 'simpleText']),
-            'views':                          viewCount,
-            'thumbnails':                     thumbnails,
-            'channeId':                       self.__getValue(video, ['ownerText', 'runs', 0, 'navigationEndpoint', 'browseEndpoint', 'browseId']), 
-            'publishTime':                    self.__getValue(video, ['publishedTimeText', 'simpleText']),
+            "index": self.index,
+            "id": videoId,
+            "link": "https://www.youtube.com/watch?v=" + videoId,
+            "title": self.__getValue(video, ["title", "runs", 0, "text"]),
+            "channel": self.__getValue(video, ["ownerText", "runs", 0, "text"]),
+            "duration": self.__getValue(video, ["lengthText", "simpleText"]),
+            "views": viewCount,
+            "thumbnails": thumbnails,
+            "channeId": self.__getValue(
+                video,
+                [
+                    "ownerText",
+                    "runs",
+                    0,
+                    "navigationEndpoint",
+                    "browseEndpoint",
+                    "browseId",
+                ],
+            ),
+            "publishTime": self.__getValue(video, ["publishedTimeText", "simpleText"]),
         }
         self.index += 1
         return component
-    
+
     @overrides(ComponentHandler)
     def _getPlaylistComponent(self, element: dict) -> dict:
         playlist = element[playlistElementKey]
-        playlistId = self.__getValue(playlist, ['playlistId'])
-        thumbnailVideoId = self.__getValue(playlist, ['navigationEndpoint', 'watchEndpoint', 'videoId'])
+        playlistId = self.__getValue(playlist, ["playlistId"])
+        thumbnailVideoId = self.__getValue(
+            playlist, ["navigationEndpoint", "watchEndpoint", "videoId"]
+        )
         thumbnails = []
-        modes = ['default', 'hqdefault', 'mqdefault', 'sddefault', 'maxresdefault']
+        modes = ["default", "hqdefault", "mqdefault", "sddefault", "maxresdefault"]
         for mode in modes:
-            thumbnails.append('https://img.youtube.com/vi/' + thumbnailVideoId + '/' + mode + '.jpg')
+            thumbnails.append(
+                "https://img.youtube.com/vi/" + thumbnailVideoId + "/" + mode + ".jpg"
+            )
         component = {
-            'index':                          self.index,
-            'id':                             playlistId,
-            'link':                           'https://www.youtube.com/playlist?list=' + playlistId,
-            'title':                          self.__getValue(playlist, ['title', 'simpleText']),
-            'thumbnails':                     thumbnails,
-            'count':                          self.__getValue(playlist, ['videoCount']),
-            'channel':                        self.__getValue(playlist, ['shortBylineText', 'runs', 0, 'text']),
+            "index": self.index,
+            "id": playlistId,
+            "link": "https://www.youtube.com/playlist?list=" + playlistId,
+            "title": self.__getValue(playlist, ["title", "simpleText"]),
+            "thumbnails": thumbnails,
+            "count": self.__getValue(playlist, ["videoCount"]),
+            "channel": self.__getValue(
+                playlist, ["shortBylineText", "runs", 0, "text"]
+            ),
         }
         self.index += 1
         return component
@@ -67,8 +87,10 @@ class LegacyComponentHandler(RequestHandler, ComponentHandler):
     def _getShelfComponent(self, element: dict) -> dict:
         shelf = element[shelfElementKey]
         return {
-            'title':                          self.__getValue(shelf, ['title', 'simpleText']),
-            'elements':                       self.__getValue(shelf, ['content', 'verticalListRenderer', 'items']),
+            "title": self.__getValue(shelf, ["title", "simpleText"]),
+            "elements": self.__getValue(
+                shelf, ["content", "verticalListRenderer", "items"]
+            ),
         }
 
     def __getValue(self, component: dict, path: List[str]) -> Union[str, int, dict]:
@@ -78,15 +100,16 @@ class LegacyComponentHandler(RequestHandler, ComponentHandler):
                 if key in value.keys():
                     value = value[key]
                 else:
-                    value = 'LIVE'
+                    value = "LIVE"
                     break
             elif type(key) is int:
                 if len(value) != 0:
                     value = value[key]
                 else:
-                    value = 'LIVE'
+                    value = "LIVE"
                     break
         return value
+
 
 class LegacySearchInternal(LegacyComponentHandler):
     exception = False
@@ -102,21 +125,21 @@ class LegacySearchInternal(LegacyComponentHandler):
         self.region = region
         self.continuationKey = None
         self.timeout = None
-    
+
     def result(self) -> Union[str, dict, list, None]:
-        '''Returns the search result.
+        """Returns the search result.
 
         Returns:
             Union[str, dict, list, None]: Returns JSON, list or dictionary & None in case of any exception.
-        '''
+        """
         if self.exception or len(self.resultComponents) == 0:
             return None
         else:
-            if self.mode == 'dict':
-                return {'search_result': self.resultComponents}
-            elif self.mode == 'json':
-                return json.dumps({'search_result': self.resultComponents}, indent = 4)
-            elif self.mode == 'list':
+            if self.mode == "dict":
+                return {"search_result": self.resultComponents}
+            elif self.mode == "json":
+                return json.dumps({"search_result": self.resultComponents}, indent=4)
+            elif self.mode == "list":
                 result = []
                 for component in self.resultComponents:
                     listComponent = []
@@ -127,17 +150,17 @@ class LegacySearchInternal(LegacyComponentHandler):
 
 
 class SearchVideos(LegacySearchInternal):
-    '''
+    """
     DEPRECATED
     ----------
     Use `VideosSearch` instead.
-    
+
     Searches for playlists in YouTube.
 
     Args:
         keyword (str): Sets the search query.
         offset (int, optional): Sets the search result page number. Defaults to 1.
-        mode (str, optional): Sets the result type, can be 'json', 'dict' or 'list'. Defaults to 'json'. 
+        mode (str, optional): Sets the result type, can be 'json', 'dict' or 'list'. Defaults to 'json'.
         max_results (int, optional): Sets limit to the number of results. Defaults to 20.
         language (str, optional): Sets the result language. Defaults to 'en-US'.
         region (str, optional): Sets the result region. Defaults to 'US'.
@@ -166,10 +189,13 @@ class SearchVideos(LegacySearchInternal):
                 }
             ]
         }
-    '''
-    def __init__(self, keyword, offset = 1, mode = 'json', max_results = 20, language = 'en', region = 'US'):
+    """
+
+    def __init__(
+        self, keyword, offset=1, mode="json", max_results=20, language="en", region="US"
+    ):
         super().__init__(keyword, offset, mode, max_results, language, region)
-        self.searchPreferences = 'EgIQAQ%3D%3D'
+        self.searchPreferences = "EgIQAQ%3D%3D"
         self._makeRequest()
         self._parseSource()
         self.__makeComponents()
@@ -180,13 +206,14 @@ class SearchVideos(LegacySearchInternal):
             if videoElementKey in element.keys():
                 self.resultComponents.append(self._getVideoComponent(element))
             if shelfElementKey in element.keys():
-                for shelfElement in self._getShelfComponent(element)['elements']:
+                for shelfElement in self._getShelfComponent(element)["elements"]:
                     self.resultComponents.append(self._getVideoComponent(shelfElement))
             if len(self.resultComponents) >= self.limit:
                 break
 
+
 class SearchPlaylists(LegacySearchInternal):
-    '''
+    """
     DEPRECATED
     ----------
     Use `PlaylistsSearch` instead.
@@ -196,7 +223,7 @@ class SearchPlaylists(LegacySearchInternal):
     Args:
         keyword (str): Sets the search query.
         offset (int, optional): Sets the search result page number. Defaults to 1.
-        mode (str, optional): Sets the result type, can be 'json', 'dict' or 'list'. Defaults to 'json'. 
+        mode (str, optional): Sets the result type, can be 'json', 'dict' or 'list'. Defaults to 'json'.
         max_results (int, optional): Sets limit to the number of results. Defaults to 20.
         language (str, optional): Sets the result language. Defaults to 'en-US'.
         region (str, optional): Sets the result region. Defaults to 'US'.
@@ -228,10 +255,13 @@ class SearchPlaylists(LegacySearchInternal):
                 }
             ]
         }
-    '''
-    def __init__(self, keyword, offset = 1, mode = 'json', max_results = 20, language = 'en', region = 'US'):
+    """
+
+    def __init__(
+        self, keyword, offset=1, mode="json", max_results=20, language="en", region="US"
+    ):
         super().__init__(keyword, offset, mode, max_results, language, region)
-        self.searchPreferences = 'EgIQAw%3D%3D'
+        self.searchPreferences = "EgIQAw%3D%3D"
         self._makeRequest()
         self._parseSource()
         self.__makeComponents()

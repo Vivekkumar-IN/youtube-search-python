@@ -1,7 +1,9 @@
-import httpx
 import os
 
+import httpx
+
 from youtubesearchpython.core.constants import userAgent
+
 
 class RequestCore:
     def __init__(self):
@@ -9,7 +11,7 @@ class RequestCore:
         self.data = None
         self.timeout = 2
         self.proxy = {}
-        
+
         http_proxy = os.environ.get("HTTP_PROXY")
         if http_proxy:
             self.proxy["http://"] = httpx.ProxyTransport(proxy_url=http_proxy)
@@ -23,7 +25,7 @@ class RequestCore:
                 self.url,
                 headers={"User-Agent": userAgent},
                 json=self.data,
-                timeout=self.timeout
+                timeout=self.timeout,
             )
             return r
 
@@ -33,17 +35,17 @@ class RequestCore:
                 self.url,
                 headers={"User-Agent": userAgent},
                 json=self.data,
-                timeout=self.timeout
+                timeout=self.timeout,
             )
             return r
 
     def syncGetRequest(self) -> httpx.Response:
         with httpx.Client(mounts=self.proxy) as client:
-            r =  client.get(
+            r = client.get(
                 self.url,
                 headers={"User-Agent": userAgent},
                 timeout=self.timeout,
-                cookies={'CONSENT': 'YES+1'}
+                cookies={"CONSENT": "YES+1"},
             )
             return r
 
@@ -53,6 +55,6 @@ class RequestCore:
                 self.url,
                 headers={"User-Agent": userAgent},
                 timeout=self.timeout,
-                cookies={'CONSENT': 'YES+1'}
+                cookies={"CONSENT": "YES+1"},
             )
             return r

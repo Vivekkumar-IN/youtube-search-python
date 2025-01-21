@@ -1,16 +1,13 @@
 import json
 from typing import Union
 from urllib.parse import urlencode
-from urllib.request import Request, urlopen
 
-import httpx
-
-from youtubesearchpython.core.constants import ResultMode, userAgent
+from youtubesearchpython.core.constants import ResultMode
 from youtubesearchpython.core.requests import RequestCore
 
 
 class SuggestionsCore(RequestCore):
-    '''Gets search suggestions for the given query.
+    """Gets search suggestions for the given query.
 
     Args:
         language (str, optional): Sets the suggestion language. Defaults to 'en'.
@@ -39,9 +36,9 @@ class SuggestionsCore(RequestCore):
                 'harry styles juice'
             ]
         }
-    '''
+    """
 
-    def __init__(self, language: str = 'en', region: str = 'US', timeout: int = None):
+    def __init__(self, language: str = "en", region: str = "US", timeout: int = None):
         super().__init__()
         self.language = language
         self.region = region
@@ -57,41 +54,57 @@ class SuggestionsCore(RequestCore):
                     searchSuggestions.append(searchSuggestionElement[0])
                 break
         if mode == ResultMode.dict:
-            return {'result': searchSuggestions}
+            return {"result": searchSuggestions}
         elif mode == ResultMode.json:
-            return json.dumps({'result': searchSuggestions}, indent=4)
+            return json.dumps({"result": searchSuggestions}, indent=4)
 
     def _get(self, query: str, mode: int = ResultMode.dict) -> Union[dict, str]:
-        self.url = 'https://clients1.google.com/complete/search' + '?' + urlencode({
-            'hl': self.language,
-            'gl': self.region,
-            'q': query,
-            'client': 'youtube',
-            'gs_ri': 'youtube',
-            'ds': 'yt',
-        })
+        self.url = (
+            "https://clients1.google.com/complete/search"
+            + "?"
+            + urlencode(
+                {
+                    "hl": self.language,
+                    "gl": self.region,
+                    "q": query,
+                    "client": "youtube",
+                    "gs_ri": "youtube",
+                    "ds": "yt",
+                }
+            )
+        )
 
         self.__makeRequest()
         return self._post_request_processing(mode)
 
-    async def _getAsync(self, query: str, mode: int = ResultMode.dict) -> Union[dict, str]:
-        self.url = 'https://clients1.google.com/complete/search' + '?' + urlencode({
-            'hl': self.language,
-            'gl': self.region,
-            'q': query,
-            'client': 'youtube',
-            'gs_ri': 'youtube',
-            'ds': 'yt',
-        })
+    async def _getAsync(
+        self, query: str, mode: int = ResultMode.dict
+    ) -> Union[dict, str]:
+        self.url = (
+            "https://clients1.google.com/complete/search"
+            + "?"
+            + urlencode(
+                {
+                    "hl": self.language,
+                    "gl": self.region,
+                    "q": query,
+                    "client": "youtube",
+                    "gs_ri": "youtube",
+                    "ds": "yt",
+                }
+            )
+        )
 
         await self.__makeAsyncRequest()
         return self._post_request_processing(mode)
 
     def __parseSource(self) -> None:
         try:
-            self.responseSource = json.loads(self.response[self.response.index('(') + 1: self.response.index(')')])
+            self.responseSource = json.loads(
+                self.response[self.response.index("(") + 1 : self.response.index(")")]
+            )
         except:
-            raise Exception('ERROR: Could not parse YouTube response.')
+            raise Exception("ERROR: Could not parse YouTube response.")
 
     def __makeRequest(self) -> None:
         request = self.syncGetRequest()

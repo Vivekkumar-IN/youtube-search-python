@@ -1,10 +1,10 @@
+from youtubesearchpython.core.channelsearch import ChannelSearchCore
 from youtubesearchpython.core.constants import *
 from youtubesearchpython.core.search import SearchCore
-from youtubesearchpython.core.channelsearch import ChannelSearchCore
 
 
 class Search(SearchCore):
-    '''Searches for videos, channels & playlists in YouTube.
+    """Searches for videos, channels & playlists in YouTube.
 
     Args:
         query (str): Sets the search query.
@@ -67,8 +67,16 @@ class Search(SearchCore):
                 }
             ]
         }
-    '''
-    def __init__(self, query: str, limit: int = 20, language: str = 'en', region: str = 'US', timeout: int = None):
+    """
+
+    def __init__(
+        self,
+        query: str,
+        limit: int = 20,
+        language: str = "en",
+        region: str = "US",
+        timeout: int = None,
+    ):
         self.searchMode = (True, True, True)
         super().__init__(query, limit, language, region, None, timeout)
         self.sync_create()
@@ -77,8 +85,9 @@ class Search(SearchCore):
     def next(self) -> bool:
         return self._next()
 
+
 class VideosSearch(SearchCore):
-    '''Searches for videos in YouTube.
+    """Searches for videos in YouTube.
 
     Args:
         query (str): Sets the search query.
@@ -141,8 +150,16 @@ class VideosSearch(SearchCore):
                 }
             ]
         }
-    '''
-    def __init__(self, query: str, limit: int = 20, language: str = 'en', region: str = 'US', timeout: int = None):
+    """
+
+    def __init__(
+        self,
+        query: str,
+        limit: int = 20,
+        language: str = "en",
+        region: str = "US",
+        timeout: int = None,
+    ):
         self.searchMode = (True, False, False)
         super().__init__(query, limit, language, region, SearchMode.videos, timeout)
         self.sync_create()
@@ -153,7 +170,7 @@ class VideosSearch(SearchCore):
 
 
 class ChannelsSearch(SearchCore):
-    '''Searches for channels in YouTube.
+    """Searches for channels in YouTube.
 
     Args:
         query (str): Sets the search query.
@@ -191,8 +208,16 @@ class ChannelsSearch(SearchCore):
                 }
             ]
         }
-    '''
-    def __init__(self, query: str, limit: int = 20, language: str = 'en', region: str = 'US', timeout: int = None):
+    """
+
+    def __init__(
+        self,
+        query: str,
+        limit: int = 20,
+        language: str = "en",
+        region: str = "US",
+        timeout: int = None,
+    ):
         self.searchMode = (False, True, False)
         super().__init__(query, limit, language, region, SearchMode.channels, timeout)
         self.sync_create()
@@ -203,7 +228,7 @@ class ChannelsSearch(SearchCore):
 
 
 class PlaylistsSearch(SearchCore):
-    '''Searches for playlists in YouTube.
+    """Searches for playlists in YouTube.
 
     Args:
         query (str): Sets the search query.
@@ -254,8 +279,16 @@ class PlaylistsSearch(SearchCore):
                 }
             ]
         }
-    '''
-    def __init__(self, query: str, limit: int = 20, language: str = 'en', region: str = 'US', timeout: int = None):
+    """
+
+    def __init__(
+        self,
+        query: str,
+        limit: int = 20,
+        language: str = "en",
+        region: str = "US",
+        timeout: int = None,
+    ):
         self.searchMode = (False, False, True)
         super().__init__(query, limit, language, region, SearchMode.playlists, timeout)
         self.sync_create()
@@ -266,7 +299,7 @@ class PlaylistsSearch(SearchCore):
 
 
 class ChannelSearch(ChannelSearchCore):
-    '''Searches for videos in specific channel in YouTube.
+    """Searches for videos in specific channel in YouTube.
 
     Args:
         query (str): Sets the search query.
@@ -335,15 +368,23 @@ class ChannelSearch(ChannelSearchCore):
                 },
             ]
         }
-    '''
+    """
 
-    def __init__(self, query: str, browseId: str, language: str = 'en', region: str = 'US', searchPreferences: str = "EgZzZWFyY2g%3D", timeout: int = None):
+    def __init__(
+        self,
+        query: str,
+        browseId: str,
+        language: str = "en",
+        region: str = "US",
+        searchPreferences: str = "EgZzZWFyY2g%3D",
+        timeout: int = None,
+    ):
         super().__init__(query, language, region, searchPreferences, browseId, timeout)
         self.sync_create()
 
 
 class CustomSearch(SearchCore):
-    '''Performs custom search in YouTube with search filters or sorting orders. 
+    """Performs custom search in YouTube with search filters or sorting orders.
     Few of the predefined filters and sorting orders are:
 
         1 - SearchMode.videos
@@ -352,7 +393,7 @@ class CustomSearch(SearchCore):
         4 - VideoSortOrder.viewCount
 
     There are many other to use.
-    The value of `sp` parameter in the YouTube search query can be used as a search filter e.g. 
+    The value of `sp` parameter in the YouTube search query can be used as a search filter e.g.
     `EgQIBRAB` from https://www.youtube.com/results?search_query=NoCopyrightSounds&sp=EgQIBRAB can be passed as `searchPreferences`, to get videos, which are uploaded this year.
 
     Args:
@@ -361,7 +402,7 @@ class CustomSearch(SearchCore):
         limit (int, optional): Sets limit to the number of results. Defaults to 20.
         language (str, optional): Sets the result language. Defaults to 'en'.
         region (str, optional): Sets the result region. Defaults to 'US'.
-    
+
     Examples:
         Calling `result` method gives the search result.
 
@@ -417,12 +458,21 @@ class CustomSearch(SearchCore):
                 }
             ]
         }
-    '''
-    def __init__(self, query: str, searchPreferences: str, limit: int = 20, language: str = 'en', region: str = 'US', timeout: int = None):
+    """
+
+    def __init__(
+        self,
+        query: str,
+        searchPreferences: str,
+        limit: int = 20,
+        language: str = "en",
+        region: str = "US",
+        timeout: int = None,
+    ):
         self.searchMode = (True, True, True)
         super().__init__(query, limit, language, region, searchPreferences, timeout)
         self.sync_create()
         self._getComponents(*self.searchMode)
-    
+
     def next(self):
         self._next()

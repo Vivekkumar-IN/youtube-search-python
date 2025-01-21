@@ -1,20 +1,20 @@
 import copy
-import urllib.request
-import urllib.parse
-
 import re
+import urllib.parse
+import urllib.request
 
-from youtubesearchpython.core.constants import ResultMode
-from youtubesearchpython.core.video import VideoCore
 from youtubesearchpython.core.componenthandler import getValue
+from youtubesearchpython.core.constants import ResultMode
 from youtubesearchpython.core.requests import RequestCore
+from youtubesearchpython.core.video import VideoCore
 
 isYtDLPinstalled = False
 
 try:
-    from yt_dlp.extractor.youtube import YoutubeBaseInfoExtractor, YoutubeIE
     from yt_dlp import YoutubeDL
-    from yt_dlp.utils import url_or_none, try_get, update_url_query, ExtractorError
+    from yt_dlp.extractor.youtube import YoutubeIE
+    from yt_dlp.utils import (ExtractorError, try_get, update_url_query,
+                              url_or_none)
 
     isYtDLPinstalled = True
 except:
@@ -22,24 +22,28 @@ except:
 
 
 class StreamURLFetcherCore(RequestCore):
-    '''
+    """
     Overrided parent's constructor.
-    '''
+    """
+
     def __init__(self):
         if isYtDLPinstalled:
             super().__init__()
             self._js_url = None
             self._js = None
-            #self.ytdlp = YoutubeBaseInfoExtractor()
+            # self.ytdlp = YoutubeBaseInfoExtractor()
             self.ytie = YoutubeIE()
             self.ytie.set_downloader(YoutubeDL())
             self._streams = []
         else:
-            raise Exception('ERROR: yt-dlp is not installed. To use this functionality of youtube-search-python, yt-dlp must be installed.')
+            raise Exception(
+                "ERROR: yt-dlp is not installed. To use this functionality of youtube-search-python, yt-dlp must be installed."
+            )
 
-    '''
+    """
     Saving videoFormats inside a dictionary with key "player_response" for apply_descrambler & apply_signature methods.
-    '''
+    """
+
     def _getDecipheredURLs(self, videoFormats: dict, formatId: int = None) -> None:
         # We reset our stream list
         # See https://github.com/alexmercerind/youtube-search-python/pull/155#discussion_r790165920
@@ -51,14 +55,23 @@ class StreamURLFetcherCore(RequestCore):
         if not videoFormats["streamingData"]:
             # Video is age-restricted. Try to retrieve it using ANDROID_EMBED client and override old response.
             # This works most time.
-            vc = VideoCore(self.video_id, None, ResultMode.dict, None, False, overridedClient="TV_EMBED")
+            vc = VideoCore(
+                self.video_id,
+                None,
+                ResultMode.dict,
+                None,
+                False,
+                overridedClient="TV_EMBED",
+            )
             vc.sync_create()
             videoFormats = vc.result
             if not videoFormats["streamingData"]:
                 # Video is:
                 # 1. Either age-restricted on so called level 3
                 # 2. Needs payment (is only for users that use so called "Join feature")
-                raise Exception("streamingData is not present in Video.get. This is most likely a age-restricted video")
+                raise Exception(
+                    "streamingData is not present in Video.get. This is most likely a age-restricted video"
+                )
         # We deepcopy a list, otherwise it would duplicate
         # See https://github.com/alexmercerind/youtube-search-python/pull/155#discussion_r790165920
         self._player_response = copy.deepcopy(videoFormats["streamingData"]["formats"])
@@ -70,22 +83,21 @@ class StreamURLFetcherCore(RequestCore):
         if res:
             # My modified RegEx derived from yt-dlp, that retrieves JavaScript version
             # Source: https://github.com/yt-dlp/yt-dlp/blob/e600a5c90817f4caac221679f6639211bba1f3a2/yt_dlp/extractor/youtube.py#L2258
-            player_version = re.search(
-                r'([0-9a-fA-F]{8})\\?', res)
+            player_version = re.search(r"([0-9a-fA-F]{8})\\?", res)
             player_version = player_version.group().replace("\\", "")
-            self._js_url = f'https://www.youtube.com/s/player/{player_version}/player_ias.vflset/en_US/base.js'
+            self._js_url = f"https://www.youtube.com/s/player/{player_version}/player_ias.vflset/en_US/base.js"
         else:
             raise Exception("Failed to retrieve JavaScript for this video")
 
     def _getJS(self) -> None:
         # Here we get a JavaScript that links to specific Player JavaScript
-        self.url = 'https://www.youtube.com/iframe_api'
+        self.url = "https://www.youtube.com/iframe_api"
         res = self.syncGetRequest()
         self.extract_js_url(res.text)
 
     async def getJavaScript(self):
         # Same as in _getJS(), except it's asynchronous
-        self.url = 'https://www.youtube.com/iframe_api'
+        self.url = "https://www.youtube.com/iframe_api"
         res = await self.asyncGetRequest()
         self.extract_js_url(res.text)
 
@@ -112,8 +124,8 @@ class StreamURLFetcherCore(RequestCore):
                     # Some deciphering magic from yt-dlp
                     # Source: https://github.com/yt-dlp/yt-dlp/blob/master/yt_dlp/extractor/youtube.py#L2972-L2981
                     sc = urllib.parse.parse_qs(cipher)
-                    fmt_url = url_or_none(try_get(sc, lambda x: x['url'][0]))
-                    encrypted_sig = try_get(sc, lambda x: x['s'][0])
+                    fmt_url = url_or_none(try_get(sc, lambda x: x["url"][0]))
+                    encrypted_sig = try_get(sc, lambda x: x["s"][0])
                     if not (sc and fmt_url and encrypted_sig):
                         # It's not ciphered
                         yt_format["throttled"] = False
@@ -121,18 +133,26 @@ class StreamURLFetcherCore(RequestCore):
                         continue
                     if not cipher:
                         continue
-                    signature = self.ytie._decrypt_signature(sc['s'][0], self.video_id, self._js_url)
-                    sp = try_get(sc, lambda x: x['sp'][0]) or 'signature'
-                    fmt_url += '&' + sp + '=' + signature
+                    signature = self.ytie._decrypt_signature(
+                        sc["s"][0], self.video_id, self._js_url
+                    )
+                    sp = try_get(sc, lambda x: x["sp"][0]) or "signature"
+                    fmt_url += "&" + sp + "=" + signature
 
                     # Some magic to unthrottle streams
                     # Source: https://github.com/yt-dlp/yt-dlp/blob/master/yt_dlp/extractor/youtube.py#L2983-L2993
                     query = urllib.parse.parse_qs(fmt_url)
                     throttled = False
-                    if query.get('n'):
+                    if query.get("n"):
                         try:
-                            fmt_url = update_url_query(fmt_url, {
-                                'n': self.ytie._decrypt_nsig(query['n'][0], self.video_id, self._js_url)})
+                            fmt_url = update_url_query(
+                                fmt_url,
+                                {
+                                    "n": self.ytie._decrypt_nsig(
+                                        query["n"][0], self.video_id, self._js_url
+                                    )
+                                },
+                            )
                         except ExtractorError as e:
                             throttled = True
                     yt_format["url"] = fmt_url
@@ -141,7 +161,7 @@ class StreamURLFetcherCore(RequestCore):
         except Exception as e:
             if retry:
                 raise e
-            '''
+            """
             Fetch updated player JavaScript to get new cipher algorithm.
-            '''
+            """
             self._decipher(retry=True)

@@ -1,19 +1,22 @@
 from youtubesearchpython import *
 
-
-video = Video.get('https://www.youtube.com/watch?v=z0GKGpObgPY', mode = ResultMode.json, get_upload_date=True)
+video = Video.get(
+    "https://www.youtube.com/watch?v=z0GKGpObgPY",
+    mode=ResultMode.json,
+    get_upload_date=True,
+)
 print(video)
-videoInfo = Video.getInfo('https://youtu.be/z0GKGpObgPY', mode = ResultMode.json)
+videoInfo = Video.getInfo("https://youtu.be/z0GKGpObgPY", mode=ResultMode.json)
 print(videoInfo)
-videoFormats = Video.getFormats('z0GKGpObgPY')
+videoFormats = Video.getFormats("z0GKGpObgPY")
 print(videoFormats)
 
 
-suggestions = Suggestions(language = 'en', region = 'US')
-print(suggestions.get('NoCopyrightSounds', mode = ResultMode.json))
+suggestions = Suggestions(language="en", region="US")
+print(suggestions.get("NoCopyrightSounds", mode=ResultMode.json))
 
 
-hashtag = Hashtag('ncs', limit = 1)
+hashtag = Hashtag("ncs", limit=1)
 print(hashtag.result())
 
 
@@ -43,7 +46,9 @@ print(Transcript.get("https://www.youtube.com/watch?v=L7kF4MXXCoA"))
 url = "https://www.youtube.com/watch?v=-1xu0IP35FI"
 
 transcript_en = Transcript.get(url)
-transcript_2 = Transcript.get(url, transcript_en["languages"][-1]["params"]) # in my case, it'd output Spanish.
+transcript_2 = Transcript.get(
+    url, transcript_en["languages"][-1]["params"]
+)  # in my case, it'd output Spanish.
 print(transcript_2)
 
 
