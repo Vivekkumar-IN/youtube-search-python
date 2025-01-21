@@ -13,8 +13,12 @@ isYtDLPinstalled = False
 try:
     from yt_dlp import YoutubeDL
     from yt_dlp.extractor.youtube import YoutubeIE
-    from yt_dlp.utils import (ExtractorError, try_get, update_url_query,
-                              url_or_none)
+    from yt_dlp.utils import (
+        ExtractorError,
+        try_get,
+        update_url_query,
+        url_or_none,
+    )
 
     isYtDLPinstalled = True
 except:

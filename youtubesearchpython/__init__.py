@@ -1,10 +1,22 @@
 from youtubesearchpython.core.constants import *
 from youtubesearchpython.core.utils import *
-from youtubesearchpython.extras import (Channel, Comments, Hashtag, Playlist,
-                                        Suggestions, Transcript, Video)
-from youtubesearchpython.search import (ChannelSearch, ChannelsSearch,
-                                        CustomSearch, PlaylistsSearch, Search,
-                                        VideosSearch)
+from youtubesearchpython.extras import (
+    Channel,
+    Comments,
+    Hashtag,
+    Playlist,
+    Suggestions,
+    Transcript,
+    Video,
+)
+from youtubesearchpython.search import (
+    ChannelSearch,
+    ChannelsSearch,
+    CustomSearch,
+    PlaylistsSearch,
+    Search,
+    VideosSearch,
+)
 from youtubesearchpython.streamurlfetcher import StreamURLFetcher
 
 __title__ = "youtube-search-python"
